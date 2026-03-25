@@ -584,32 +584,35 @@ void FromVector3(float * x, Vector3 v) { x[0]=v.x; x[1]=v.y; x[2]=v.z; }
   (unsigned-int sampleRate wave-sample-rate wave-sample-rate-set!)
   (unsigned-int sampleSize wave-sample-size wave-sample-size-set!)
   (unsigned-int channels wave-channels wave-channels-set!)
-  (c-pointer data wave-data))
+  (c-pointer data wave-data wave-data-set!))
 
 (define-foreign-record-type (Sound "struct Sound")
   (constructor: make-sound)
   (destructor: free-sound))
 
-(define wave-data-set!
-  (foreign-lambda* void ((Wave wave) (s16vector data))
-    "wave->data = data;"))
+(define load-wave
+  (foreign-lambda* Wave ((c-string filename))
+    "
+    Wave * waveptr = malloc(sizeof(Wave));
+    *waveptr = LoadWave(filename);
+    C_return(waveptr);"))
 
-; (define-foreign-type Sound c-pointer)
+(define unload-wave
+  (foreign-lambda* void ((Wave wave))
+    "UnloadWave(*wave);"))
 
-; Raylib returns the Sound struct as a value, while Chicken Scheme does not allow to C_return struct values, so we have to copy it to the heap
 (define load-sound-from-wave
   (foreign-lambda* Sound ((Wave wave))
     "
-    Sound sound = LoadSoundFromWave(*wave);
-    Sound *soundptr = malloc(sizeof(Sound));
-    memcpy(soundptr, &sound, sizeof(Sound));
+    Sound * soundptr = malloc(sizeof(Sound));
+    *soundptr = LoadSoundFromWave(*wave);
     C_return(soundptr);"))
 
 (define load-sound
   (foreign-lambda* Sound ((c-string filepath))
-    "Sound sound = LoadSound(filepath);
-    Sound *soundptr = malloc(sizeof(Sound));
-    memcpy(soundptr, &sound, sizeof(Sound));
+    "
+    Sound * soundptr = malloc(sizeof(Sound));
+    *soundptr = LoadSound(filepath);
     C_return(soundptr);"))
 
 (define play-sound
