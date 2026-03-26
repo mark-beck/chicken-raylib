@@ -615,6 +615,10 @@ void FromVector3(float * x, Vector3 v) { x[0]=v.x; x[1]=v.y; x[2]=v.z; }
     *soundptr = LoadSound(filepath);
     C_return(soundptr);"))
 
+(define unload-sound
+  (foreign-lambda* void ((Sound sound))
+  "UnloadSound(*sound);"))
+
 (define play-sound
   (foreign-lambda* void ((Sound sound))
   "PlaySound(*sound);"))
